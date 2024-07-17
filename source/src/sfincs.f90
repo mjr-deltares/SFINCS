@@ -5,14 +5,13 @@ program sfincs
    implicit none
    !
    integer :: ierr
-   character(len=1024) :: config_file
    double precision    :: deltat
    !
    deltat = -1.0
    ierr = 0
    !
    if (ierr == 0) then
-      ierr = sfincs_initialize(config_file)
+      ierr = sfincs_initialize()
    endif
    !
    if (ierr == 0) then

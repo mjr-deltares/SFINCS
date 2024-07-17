@@ -74,9 +74,8 @@ module sfincs_lib
    !
    contains
    !
-   function sfincs_initialize(config_file) result(ierr)
+   function sfincs_initialize() result(ierr)
    !
-   character(len=*) :: config_file
    integer :: ierr
    !
    error = 0 ! Error code. This is now only set to 1 in case of instabilities. Could also use other error codes, e.g. for missing files.
@@ -275,7 +274,7 @@ module sfincs_lib
       ! New time step
       !
       nt = nt + 1
-      dt = alfa*min_dt ! min_dt was computed in sfincs_momentum.f90 without alfa
+      dt = min(alfa*min_dt, t1-t) ! min_dt was computed in sfincs_momentum.f90 without alfa
       !
       ! A bit unclear why this happens, but large jumps in the time step lead to weird oscillations.
       ! In the 'original' sfincs v11 version, this behavior was supressed by the use of theta.

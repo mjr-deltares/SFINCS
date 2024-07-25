@@ -224,6 +224,7 @@ module sfincs_lib
    integer                       :: mmx
    integer                       :: nm
    real*4                        :: hmx
+   real*8                        :: tend !< end of update interval
    !
    ierr = 0
    !
@@ -251,7 +252,9 @@ module sfincs_lib
    ! Set target time: if dt range is negative, do not modify t1
    !
    if ( dtrange > 0.0 ) then
-       t1 = t + dtrange
+      tend = t + dtrange
+   else
+      tend = t1
    endif
    !
    ! Start computational loop
@@ -262,7 +265,7 @@ module sfincs_lib
    !
    call system_clock(count00, count_rate, count_max)
    !
-   do while (t<t1)
+   do while (t<tend)
       !
       call system_clock(countdt0, count_rate, count_max)
       !
@@ -274,7 +277,7 @@ module sfincs_lib
       ! New time step
       !
       nt = nt + 1
-      dt = min(alfa*min_dt, t1-t) ! min_dt was computed in sfincs_momentum.f90 without alfa
+      dt = min(alfa*min_dt, tend-t) ! min_dt was computed in sfincs_momentum.f90 without alfa
       !
       ! A bit unclear why this happens, but large jumps in the time step lead to weird oscillations.
       ! In the 'original' sfincs v11 version, this behavior was supressed by the use of theta.

@@ -225,6 +225,7 @@ module sfincs_lib
    integer                       :: nm
    real*4                        :: hmx
    real*8                        :: tend !< end of update interval
+   real*4                        :: dtchk !< dt to check for instability
    !
    ierr = 0
    !
@@ -253,15 +254,16 @@ module sfincs_lib
    !
    if ( dtrange > 0.0 ) then
       tend = t + dtrange
+      write(*,*) "step from ", t, " to ", tend
    else
       tend = t1
    endif
    !
    ! Start computational loop
    !
-   write(*,'(a)')''   
-   write(*,*)'---------- Starting simulation ----------'
-   write(*,'(a)')''   
+   ! write(*,'(a)')''   
+   ! write(*,*)'---------- Starting simulation ----------'
+   ! write(*,'(a)')''   
    !
    call system_clock(count00, count_rate, count_max)
    !
@@ -278,6 +280,7 @@ module sfincs_lib
       !
       nt = nt + 1
       dt = min(alfa*min_dt, tend-t) ! min_dt was computed in sfincs_momentum.f90 without alfa
+      dtchk = alfa*min_dt
       !
       ! A bit unclear why this happens, but large jumps in the time step lead to weird oscillations.
       ! In the 'original' sfincs v11 version, this behavior was supressed by the use of theta.
@@ -474,7 +477,7 @@ module sfincs_lib
       !      
       ! Stop loop in case of instabilities (make sure water depth does not exceed stopdepth)
       !
-      if (dt<dtmin .and. nt>1) then
+      if (dtchk<dtmin .and. nt>1) then
          !
          error = 1
          write(error_message,'(a,f0.1,a)')'Error! Maximum depth of ', stopdepth, ' m reached!!! Simulation stopped.'
@@ -495,11 +498,11 @@ module sfincs_lib
          call system_clock(count1, count_rate, count_max)
          trun  = 1.0*(count1 - count00)/count_rate
          trem = trun / max(0.01*percdone, 1.0e-6) - trun
-         if (int(percdone)>0) then         
-            write(*,'(i4,a,f7.1,a)')int(percdone),'% complete, ',trem,' s remaining ...'
-         else
-            write(*,'(i4,a,f7.1,a)')int(percdone),'% complete,       - s remaining ...'
-         endif   
+         ! if (int(percdone)>0) then         
+         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete, ',trem,' s remaining ...'
+         ! else
+         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete,       - s remaining ...'
+         ! endif   
          !
       endif
       !

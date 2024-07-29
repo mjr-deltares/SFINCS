@@ -107,10 +107,8 @@ contains
          c_data = c_loc(zb)
       case("subgrid_z_zmin")
          c_data = c_loc(subgrid_z_zmin)
-      case("z_index_z_n")
-         c_data = c_loc(z_index_z_n)
-      case("z_index_z_m")
-         c_data = c_loc(z_index_z_m)
+      case("cumprcpt")
+         c_data = c_loc(cumprcpt)
       case default
          c_data = c_null_ptr
          ierr = -1
@@ -138,6 +136,8 @@ contains
          var_shape(1) = size(subgrid_z_zmin)
       case("z_index_z_n", "z_index_z_m")
          var_shape(1) = size(z_index_z_n)
+      case("cumprcpt")
+         var_shape(1) = size(cumprcpt)
       case default
          ierr = -1
       end select
@@ -158,7 +158,7 @@ contains
       var_name = char_array_to_string(c_var_name, strlen(c_var_name, BMI_LENVARADDRESS))
 
       select case(var_name)
-      case("z_xz", "z_yz", "zs", "zb", "subgrid_z_zmin")
+      case("z_xz", "z_yz", "zs", "zb", "subgrid_z_zmin", "cumprcpt")
          type_name = "float"
       case("z_index_z_n", "z_index_z_m")
          type_name = "integer"
@@ -184,7 +184,7 @@ contains
       var_name = char_array_to_string(c_var_name, strlen(c_var_name, BMI_LENVARADDRESS))
       
       select case(var_name)
-      case("z_xz", "z_yz", "zs", "zb", "subgrid_z_zmin", "z_index_z_n", "z_index_z_m")
+      case("z_xz", "z_yz", "zs", "zb", "subgrid_z_zmin", "cumprcpt")
          rank = 1
       case default
          ierr = -1

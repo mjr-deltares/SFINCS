@@ -502,7 +502,7 @@ module sfincs_data
       real*4, dimension(:),   allocatable :: prcp
       real*4, dimension(:),   allocatable :: cumprcp
       real*4, dimension(:),   allocatable :: netprcp
-      real*4, dimension(:),   allocatable :: cumprcpt
+      real*4, dimension(:),   allocatable, target :: cumprcpt
       real*4, dimension(:),   allocatable :: cuminf
       real*4, dimension(:),   allocatable :: tauwu0
       real*4, dimension(:),   allocatable :: tauwu1

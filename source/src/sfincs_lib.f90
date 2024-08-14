@@ -76,9 +76,8 @@ module sfincs_lib
    !
    contains
    !
-   function sfincs_initialize(config_file) result(ierr)
+   function sfincs_initialize() result(ierr)
    !
-   character(len=*) :: config_file
    integer :: ierr
    !
    error = 0 ! Error code. This is now only set to 1 in case of instabilities. Could also use other error codes, e.g. for missing files.
@@ -223,6 +222,8 @@ module sfincs_lib
    !
    double precision, intent(in)  :: dtrange
    integer                       :: ierr
+   real*8                        :: tend !< end of update interval
+   real*4                        :: dtchk !< dt to check for instability
    !
    ierr = 0
    !
@@ -243,7 +244,7 @@ module sfincs_lib
    !$acc               tauwu, tauwv, tauwu0, tauwv0, tauwu1, tauwv1, &
    !$acc               windu, windv, windu0, windv0, windu1, windv1, windmax, & 
    !$acc               patm, patm0, patm1, patmb, nmindbnd, &
-   !$acc               prcp, prcp0, prcp1, cumprcp, cumprcpt, netprcp, prcp, qinfmap, cuminf, & 
+   !$acc               prcp, prcp0, prcp1, cumprcp, cumprcpt, netprcp, prcp, qinfmap, cuminf, qext, & 
    !$acc               dxminv, dxrinv, dyrinv, dxm2inv, dxr2inv, dyr2inv, dxrinvc, dxm, dxrm, dyrm, cell_area_m2, cell_area, &
    !$acc               gn2uv, fcorio2d, min_dt, storage_volume, nuvisc, &
    !$acc               cuv_index_uv, cuv_index_uv1, cuv_index_uv2 )
@@ -251,19 +252,22 @@ module sfincs_lib
    ! Set target time: if dt range is negative, do not modify t1
    !
    if ( dtrange > 0.0 ) then
-       t1 = t + dtrange
+      tend = t + dtrange
+      write(*,*) "step from ", t, " to ", tend
+   else
+      tend = t1
    endif
    !
    ! Start computational loop
    !
-   write(*,'(a)')''   
-   write(*,*)'---------- Starting simulation ----------'   
-   write(*,'(a,i0,a,i0,a)')' ---- Using ', omp_get_max_threads(), ' of ', omp_get_num_procs(), ' available threads -----'   
-   write(*,'(a)')''   
+!   write(*,'(a)')''   
+!   write(*,*)'---------- Starting simulation ----------'   
+!   write(*,'(a,i0,a,i0,a)')' ---- Using ', omp_get_max_threads(), ' of ', omp_get_num_procs(), ' available threads -----'   
+!   write(*,'(a)')''   
    !
    call system_clock(count00, count_rate, count_max)
    !
-   do while (t<t1)
+   do while (t<tend)
       !
       call system_clock(countdt0, count_rate, count_max)
       !
@@ -275,7 +279,8 @@ module sfincs_lib
       ! New time step
       !
       nt = nt + 1
-      dt = alfa * min_dt ! min_dt was computed in sfincs_momentum.f90 without alfa
+      dt = min(alfa * min_dt, tend - t) ! min_dt was computed in sfincs_momentum.f90 without alfa
+      dtchk = alfa * min_dt
       !
       ! A bit unclear why this happens, but large jumps in the time step lead to weird oscillations.
       ! In the 'original' sfincs v11 version, this behavior was supressed by the use of theta.
@@ -475,7 +480,7 @@ module sfincs_lib
       !      
       ! Stop loop in case of instabilities (make sure water depth does not exceed stopdepth)
       !
-      if (dt<dtmin .and. nt>1) then
+      if (dtchk<dtmin .and. nt>1) then
          !
          error = 1
          write(error_message,'(a,f0.1,a)')'Error! Maximum depth of ', stopdepth, ' m reached!!! Simulation stopped.'
@@ -496,11 +501,11 @@ module sfincs_lib
          call system_clock(count1, count_rate, count_max)
          trun  = 1.0*(count1 - count00)/count_rate
          trem = trun / max(0.01*percdone, 1.0e-6) - trun
-         if (int(percdone)>0) then         
-            write(*,'(i4,a,f7.1,a)')int(percdone),'% complete, ',trem,' s remaining ...'
-         else
-            write(*,'(i4,a,f7.1,a)')int(percdone),'% complete,       - s remaining ...'
-         endif   
+         ! if (int(percdone)>0) then         
+         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete, ',trem,' s remaining ...'
+         ! else
+         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete,       - s remaining ...'
+         ! endif   
          !
       endif
       !

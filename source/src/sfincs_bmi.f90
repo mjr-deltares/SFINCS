@@ -47,7 +47,7 @@ contains
    function initialize() result(ierr) bind(C, name="initialize")
    !DEC$ ATTRIBUTES DLLEXPORT :: initialize
       integer(kind=c_int) :: ierr
-
+      bmi  = .true.
       ierr = sfincs_initialize()
 
    end function initialize
@@ -191,6 +191,34 @@ contains
       end select
 
    end function get_var_rank
+
+   function set_logical(c_flag_name, ival) result(ierr) bind(C, name="set_logical")
+   !DEC$ ATTRIBUTES DLLEXPORT :: set_logical
+      character(kind=c_char), intent(in) :: c_flag_name(*)
+      integer(kind=c_int) :: ival(*)
+      integer(kind=c_int) :: ierr
+      character(len=BMI_LENVARADDRESS-1) :: flag_name
+      logical :: bval
+      !
+      ierr = 0
+      !
+      flag_name = char_array_to_string(c_flag_name, strlen(c_flag_name, BMI_LENVARADDRESS))      
+      !
+      if (ival(1) == 0) then
+         bval = .false.
+      else
+         bval = .true.
+      endif
+      !
+      select case(flag_name)
+      case("qext")
+         use_qext = bval
+         write(*,*)'use_qext = ', use_qext 
+      case default
+         ierr = -1
+      end select
+
+   end function set_logical
       
    function get_start_time(tstart) result(ierr) bind(C, name="get_start_time")
    !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time

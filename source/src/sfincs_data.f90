@@ -11,6 +11,11 @@ module sfincs_data
       integer :: error
       character*256 :: error_message
       !!!
+      !!! BMI
+      !!!
+      logical       :: bmi
+      logical       :: use_qext
+      !!!
       !!! Constants
       !!!
       real*4 g                                   ! gravitational constant g
@@ -230,7 +235,6 @@ module sfincs_data
       logical       :: advection_mask
       logical       :: wiggle_suppression
       logical       :: wmrandom      
-      logical       :: use_qext
       !!!
       !!! sfincs_input.f90 switches
       integer storevelmax

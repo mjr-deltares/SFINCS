@@ -214,6 +214,13 @@ module sfincs_lib
    !
    ierr = error
    !
+   write(*,'(a)')''   
+   write(*,*)'---------- Starting simulation ----------'   
+   write(*,'(a,i0,a,i0,a)')' ---- Using ', omp_get_max_threads(), ' of ', omp_get_num_procs(), ' available threads -----'   
+   write(*,'(a)')''      
+   !
+   call system_clock(count00, count_rate, count_max)
+   !
    end function sfincs_initialize
    !
    !-----------------------------------------------------------------------------------------------------!
@@ -253,19 +260,11 @@ module sfincs_lib
    !
    if ( dtrange > 0.0 ) then
       tend = t + dtrange
-      write(*,*) "step from ", t, " to ", tend
    else
       tend = t1
    endif
    !
    ! Start computational loop
-   !
-!   write(*,'(a)')''   
-!   write(*,*)'---------- Starting simulation ----------'   
-!   write(*,'(a,i0,a,i0,a)')' ---- Using ', omp_get_max_threads(), ' of ', omp_get_num_procs(), ' available threads -----'   
-!   write(*,'(a)')''   
-   !
-   call system_clock(count00, count_rate, count_max)
    !
    do while (t<tend)
       !
@@ -493,19 +492,19 @@ module sfincs_lib
          !
       endif
       !
-      percdone = min(100*(t - t0)/(t1 - t0), 100.0)
+      percdone = min(100 * (t - t0) / (t1 - t0), 100.0)
       !
-      if (percdone>=percdonenext) then
+      if (percdone >= percdonenext) then
          !
-         percdonenext = 1.0*(int(percdone) + 5)
+         percdonenext = 1.0 * (int(percdone) + 5)
          call system_clock(count1, count_rate, count_max)
-         trun  = 1.0*(count1 - count00)/count_rate
-         trem = trun / max(0.01*percdone, 1.0e-6) - trun
-         ! if (int(percdone)>0) then         
-         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete, ',trem,' s remaining ...'
-         ! else
-         !    write(*,'(i4,a,f7.1,a)')int(percdone),'% complete,       - s remaining ...'
-         ! endif   
+         trun  = 1.0 * (count1 - count00) / count_rate
+         trem = trun / max(0.01 * percdone, 1.0e-6) - trun
+         if (int(percdone) > 0) then         
+            write(*,'(i4,a,f7.1,a)')int(percdone), '% complete, ', trem, ' s remaining ...'
+         else
+            write(*,'(i4,a,f7.1,a)')int(percdone), '% complete,       - s remaining ...'
+         endif   
          !
       endif
       !
@@ -554,8 +553,8 @@ module sfincs_lib
    endif   
    if (wind .or. patmos .or. precip) then
       write(*,'(a,f10.3,a,f5.1,a)') ' Time in meteo forcing  : ',tloopwnd2,' (',100*tloopwnd2/(tfinish_all - tstart_all),'%)'
-   endif   
-   write(*,'(a,f10.3,a,f5.1,a)') ' Time in momentum       : ',tloopflux,' (',100*tloopflux/(tfinish_all - tstart_all),'%)'
+   endif
+   write(*,'(a,f10.3,a,f5.1,a)') ' Time in momentum       : ', tloopflux, ' (', 100 * tloopflux / (tfinish_all - tstart_all), '%)'
    if (nrstructures>0) then
       write(*,'(a,f10.3,a,f5.1,a)') ' Time in structures     : ',tloopstruc,' (',100*tloopstruc/(tfinish_all - tstart_all),'%)'
    endif   

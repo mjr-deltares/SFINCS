@@ -2457,7 +2457,7 @@ contains
       !
    endif
    !
-   if (use_qext) then
+   if (use_qext == 1) then
       !
       ! Allocating and initializing qext (used e.g. for BMI coupling with ground water model)
       !
@@ -2466,7 +2466,7 @@ contains
       !
    endif    
    !
-   if (precip .or. use_qext) then
+   if (precip .or. use_qext == 1) then
       !
       ! cumprcpt array for cumulative total influx 
       ! 

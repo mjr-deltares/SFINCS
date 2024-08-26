@@ -14,7 +14,7 @@ module sfincs_data
       !!! BMI
       !!!
       logical       :: bmi
-      logical       :: use_qext
+      integer       :: use_qext
       !!!
       !!! Constants
       !!!

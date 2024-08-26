@@ -103,7 +103,7 @@ contains
             !
          endif
          !
-         if (use_qext) then
+         if (use_qext == 1) then
             !
             ! Add external source (e.g. from BMI coupling) 
             ! 
@@ -111,7 +111,7 @@ contains
             !
          endif
          !
-         if (precip .or. use_qext) then
+         if (precip .or. use_qext == 1) then
             !
             ! Add rain and/or infiltration only when cumulative effect over last interval exceeds 0.001 m
             ! Otherwise single precision may miss a lot of the rainfall/infiltration
@@ -321,7 +321,7 @@ contains
             !
          endif
          !
-         if (use_qext) then
+         if (use_qext == 1) then
             !
             ! Add external source (e.g. from BMI coupling) 
             ! 
@@ -329,7 +329,7 @@ contains
             !
          endif
          !
-         if (precip .or. use_qext) then
+         if (precip .or. use_qext == 1) then
             !
             ! Add rain and/or infiltration only when cumulative effect over last interval exceeds 0.001 m
             ! Otherwise single precision may miss a lot of the rainfall/infiltration

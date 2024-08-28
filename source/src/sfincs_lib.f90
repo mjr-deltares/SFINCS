@@ -1,5 +1,7 @@
 module sfincs_lib
    !
+   use omp_lib
+   !
    use sfincs_spiderweb
    use sfincs_input
    use sfincs_domain
@@ -212,6 +214,13 @@ module sfincs_lib
    !
    ierr = error
    !
+   write(*,'(a)')''   
+   write(*,*)'---------- Starting simulation ----------'   
+   write(*,'(a,i0,a,i0,a)')' ---- Using ', omp_get_max_threads(), ' of ', omp_get_num_procs(), ' available threads -----'   
+   write(*,'(a)')''      
+   !
+   call system_clock(count00, count_rate, count_max)
+   !
    end function sfincs_initialize
    !
    !-----------------------------------------------------------------------------------------------------!
@@ -260,12 +269,6 @@ module sfincs_lib
    endif
    !
    ! Start computational loop
-   !
-   ! write(*,'(a)')''   
-   ! write(*,*)'---------- Starting simulation ----------'
-   ! write(*,'(a)')''   
-   !
-   call system_clock(count00, count_rate, count_max)
    !
    do while (t<tend)
       !

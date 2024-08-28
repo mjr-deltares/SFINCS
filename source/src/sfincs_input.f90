@@ -116,6 +116,7 @@ contains
    call read_logical_input(500,'wmrandom',wmrandom,.true.)   
    call read_char_input(500,'advection_scheme',advstr,'upw1')   
    call read_real_input(500,'btrelax',btrelax,3600.0)
+   call read_logical_input(500,'qext',use_qext,.false.) ! Should this instead be set by the BMI coupler?
    !
    ! Domain
    !

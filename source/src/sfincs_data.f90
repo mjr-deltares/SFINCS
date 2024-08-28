@@ -220,7 +220,8 @@ module sfincs_data
       logical       :: friction2d
       logical       :: advection_limiter
       logical       :: advection_mask
-      logical       :: wmrandom      
+      logical       :: wmrandom   
+      logical       :: use_qext   
       !!!
       !!! sfincs_input.f90 switches
       integer storevelmax
@@ -502,7 +503,8 @@ module sfincs_data
       real*4, dimension(:),   allocatable :: prcp
       real*4, dimension(:),   allocatable :: cumprcp
       real*4, dimension(:),   allocatable :: netprcp
-      real*4, dimension(:),   allocatable, target :: cumprcpt
+      real*4, dimension(:),   allocatable :: cumprcpt
+      real*4, dimension(:),   allocatable, target :: qext
       real*4, dimension(:),   allocatable :: cuminf
       real*4, dimension(:),   allocatable :: tauwu0
       real*4, dimension(:),   allocatable :: tauwu1
@@ -923,6 +925,7 @@ module sfincs_data
     if(allocated(patm1)) deallocate(patm1)
     if(allocated(prcp0)) deallocate(prcp0)
     if(allocated(prcp1)) deallocate(prcp1)
+    if(allocated(qext)) deallocate(qext)
     !
 !    if(allocated(kfuv)) deallocate(kfuv)
     !

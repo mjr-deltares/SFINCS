@@ -109,7 +109,7 @@ contains
    !$omp parallel &
    !$omp private ( nm,dvol,nmd,nmu,ndm,num,qnmd,qnmu,qndm,qnum,iwm)
    !$omp do schedule ( dynamic, 256 )
-   !$acc kernels present( kcs, zs, zb, netprcp, cumprcpt, prcp, q, zsmax, zsm, maxzsm, &
+   !$acc kernels present( kcs, zs, zb, netprcp, cumprcpt, qext, prcp, q, zsmax, zsm, maxzsm, &
    !$acc                  z_flags_iref, uv_flags_iref, &
    !$acc                  z_index_uv_md, z_index_uv_nd, z_index_uv_mu, z_index_uv_nu, &
    !$acc                  dxm, dxrm, dyrm, dxminv, dxrinv, dyrinv, cell_area_m2, cell_area,  &
@@ -121,7 +121,19 @@ contains
          !
          if (precip) then
             !
-            cumprcpt(nm) = cumprcpt(nm) + netprcp(nm)*dt
+            cumprcpt(nm) = cumprcpt(nm) + netprcp(nm) * dt
+            !
+         endif
+         !
+         if (use_qext) then
+            !
+            ! Add external source (e.g. from BMI coupling) 
+            ! 
+            cumprcpt(nm) = cumprcpt(nm) + qext(nm) * dt
+            !
+         endif
+         !
+         if (precip .or. use_qext) then
             !
             ! Add rain and/or infiltration only when cumulative effect over last interval exceeds 0.001 m
             ! Otherwise single precision may miss a lot of the rainfall/infiltration
@@ -130,7 +142,6 @@ contains
                !
                zs(nm) = zs(nm) + cumprcpt(nm)
                cumprcpt(nm) = 0.0
-!               zs(nm) = max(zs(nm), zb(nm)) ! don't allow negative water levels due to infiltration
                !
             endif
             !
@@ -325,7 +336,7 @@ contains
    !$omp do schedule ( dynamic, 256 )
    !$acc kernels present( kcs, zs, zb, z_volume, zsmax, zsm, maxzsm, &
    !$acc                  subgrid_z_zmin,  subgrid_z_zmax, subgrid_z_dep, subgrid_z_volmax, &
-   !$acc                  netprcp, cumprcpt, prcp, q, z_flags_iref, uv_flags_iref, &
+   !$acc                  netprcp, cumprcpt, qext, prcp, q, z_flags_iref, uv_flags_iref, &
    !$acc                  z_index_uv_md, z_index_uv_nd, z_index_uv_mu, z_index_uv_nu, &
    !$acc                  dxm, dxrm, dyrm, dxminv, dxrinv, dyrinv, cell_area_m2, cell_area, &
    !$acc                  z_index_wavemaker, wavemaker_uvmean, wavemaker_nmd, wavemaker_nmu, wavemaker_ndm, wavemaker_num, storage_volume), async(1)
@@ -346,14 +357,28 @@ contains
          !
          if (precip) then
             !
-            cumprcpt(nm) = cumprcpt(nm) + netprcp(nm)*dt
+            ! Add nett rainfall 
+            ! 
+            cumprcpt(nm) = cumprcpt(nm) + netprcp(nm) * dt
+            !
+         endif
+         !
+         if (use_qext) then
+            !
+            ! Add external source (e.g. from BMI coupling) 
+            ! 
+            cumprcpt(nm) = cumprcpt(nm) + qext(nm) * dt
+            !
+         endif
+         !
+         if (precip .or. use_qext) then
             !
             ! Add rain and/or infiltration only when cumulative effect over last interval exceeds 0.001 m
             ! Otherwise single precision may miss a lot of the rainfall/infiltration
             !
-            if (cumprcpt(nm)>0.001 .or. cumprcpt(nm)<-0.001) then
+            if (cumprcpt(nm) > 0.001 .or. cumprcpt(nm) < -0.001) then
                !
-               dvol = dvol + cumprcpt(nm)*a
+               dvol = dvol + cumprcpt(nm) * a
                cumprcpt(nm) = 0.0
                !
             endif
